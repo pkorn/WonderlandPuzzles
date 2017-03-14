@@ -35,6 +35,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var fgNode: SKNode!
     var hearts: SKSpriteNode!
     var objectLandedOn: SKNode!
+  
     
     let firstNum = SKLabelNode(fontNamed: "Futura")
     let secondNum = SKLabelNode(fontNamed: "Futura")
@@ -57,6 +58,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var currentRow = 1
     var spacesToRowEnd = 5
     var spacesToRowStart = 0
+    var movePath = CGMutablePath()
     
 
     private let walkingActionKey = "action_walking"
@@ -70,7 +72,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                               SKTexture(imageNamed: "whiteRabbit_transp3_left"),
                               SKTexture(imageNamed: "whiteRabbit_transp_left")]
     
-    
+
     
     required init?(coder aDecoder: NSCoder)
     {
@@ -90,6 +92,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         })
         
         rabbitNode = childNode(withName: "//whiteRabbit") as! RabbitNode
+        movePath.move(to: CGPoint(x: 50, y: 0))
+        
+        let shape = SKShapeNode()
+        shape.path = movePath
+    
+        shape.strokeColor = .red
+        shape.lineWidth = 2
+        addChild(shape)
+        
  //       rabbitNode?.position = CGPoint(x: 50, y: 0)
         
         print("\n Before move, Rabbit is at \(rabbitNode.position.x) \n")
@@ -100,51 +111,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         
         setRandomOperands()
     }
-/*
-    func didBegin(_ contact: SKPhysicsContact)
-    {
-        print("Contact detected")
-        var rabbitBody: SKPhysicsBody
-        var objectBody: SKPhysicsBody
 
-            let touched = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
-                if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask
-                {
-                    rabbitBody = contact.bodyA
-                    objectBody = contact.bodyB
-                }
-                else
-                {
-                    rabbitBody = contact.bodyB
-                    objectBody = contact.bodyA
-                }
-        
-                contactPos = contact.contactPoint
-                print("\n Beginning Contact Position is \(contactPos) \n")
-        
-
-            
-                if touched == PhysicsCategory.Rabbit | PhysicsCategory.ValueObject
-                {
-                    
-                    
-                    print("Landed on an object")
-                    print("\n Before removing object, moveEnded is \(moveEnded) \n")
-                    
-                    run(SKAction.sequence([
-                        SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-                    
-                        collectObject(object: objectBody.node!)
-                        objectBody.node?.run(SKAction.scale(to: 0.8, duration: 0.1))
-                        objectBody.node?.run(SKAction.removeFromParent()
-                    )
-                }
-                else
-                {
-                    print("Passed through an object")
-                }
-    }
- */
     
     func didBegin(_ contact: SKPhysicsContact)
     {
@@ -166,27 +133,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         
         contactPos = contact.contactPoint
 
-        print("Before check, currentSpaceInRow is \(currentSpaceInRow) and Rabbit's x position is at \(rabbitNode.position.x) \n and rabbitPos is \(rabbitPos) and spacesToMove is \(spacesToMove) and moveEnded is \(moveEnded)")
+//        print("Before check, currentSpaceInRow is \(currentSpaceInRow) and Rabbit's x position is at \(rabbitNode.position.x) \n and rabbitPos is \(rabbitPos) and spacesToMove is \(spacesToMove) and moveEnded is \(moveEnded)")
         
         if touched == PhysicsCategory.Rabbit | PhysicsCategory.ValueObject // && rabbitPos == spacesToMove  && (Int(rabbitNode.position.x) >  (140 * (currentSpaceInRow - 2)))  && moveEnded == true
         {
             print("\n The name of the value object is \(objectBody.node!.name)")
             print("The position of the value object is \(objectBody.node!.position)\n")
             print("The position of the rabbit is \(rabbitBody.node!.position)\n")
-            print("The position of contact is \(contactPos)\n")
+
             
             landedOnObject = true
             objectLandedOn = objectBody.node!
             print("Landed on an object")
- /*
-            run(SKAction.sequence([
-                SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-            
-            collectObject(object: objectLandedOn!)
-            objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
-            objectLandedOn?.run(SKAction.removeFromParent()
-            )
- */
         }
         else
         {
@@ -194,19 +152,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         }
     }
     
-    /*
-     func closureReturn(numSpaces: Int, withCompletionHandler: (_ result: Int) -> Void) {
-     if(numSpaces > 0){
-     withCompletionHandler(_: numSpaces)
-     }
-     else{
-     withCompletionHandler(_: numSpaces)
-     }
-     }
-     */
     
-    
-    func moveRabbit(numSpaces: Int, withCompletionHandler: (_ result: Int) -> Void) {
+    func moveRabbit(numSpaces: Int)
+    {
         moveEnded = false
         rabbitPos = 0 // keep track of whether rabbit has moved all the spaces yet
         spacesToRowStart = currentSpaceInRow - 1
@@ -229,11 +177,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 moveEnded = false  // move will continue past this row
             }
-            
+           
             moveRabbitOnRow(numSpaces: numSpaces)
         }
-       
-        withCompletionHandler(_: numSpaces)
+
         
     }
     
@@ -262,180 +209,57 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 spacesToMoveOnThisRow = -1 * spacesToRowStart
             }
-
-            
         }
-
-        // odd numbered rows - move right (add to x)
-        if (currentRow % 2 > 0)
-        {
-            let walk = SKAction.animate(with: walkFrames, timePerFrame: 0.1)
-            let walkNumberTimes = SKAction.repeat(walk, count: numSpaces)
-            let playStepSound = SKAction.playSoundFileNamed("running3.mp3", waitForCompletion: false)
-            
-            let moveRight = SKAction.moveBy(x: 140 * CGFloat(spacesToMoveOnThisRow!), y: 0, duration: 1.0)
-            let repeatStepSound = SKAction.repeat(playStepSound, count: spacesToMoveOnThisRow!)
-            
-            let group = SKAction.group([walkNumberTimes, repeatStepSound, moveRight])
-            
-            rabbitNode.run(group, completion: {
-                
-                print("\n After moveRabbitOnRow move to numSpaces, rabbitNode.position.x is at \(self.rabbitNode.position.x) and rabbitPos is \(self.rabbitPos) and currentSpaceInRow is \(self.currentSpaceInRow)\n and currentRow is \(self.currentRow)")
-                
-                if self.moveEnded == false
-                {
-
-                    if numSpaces > 0
-                    {
-                        let moveDown = SKAction.moveBy(x: 0, y: self.rowHeight, duration: 1.0)
-                        self.rabbitPos += 2
-                        self.rabbitNode.run(moveDown, completion: {
-                            self.currentSpaceInRow = 1 // count spaces from right to left on even rows!
-                            self.currentRow = self.currentRow + 1
-                            print("\n !!!!!!!!!! Moved down, numSpaces is \(numSpaces)  !!!!!!!!!!!\n")
-
-                            self.moveRabbit(numSpaces: numSpaces - (self.spacesToRowEnd + 1)) {
-                                (result) -> Void in
-                                print(result)
-                            }// recursive call to keep this up until move ends
-
-                        })
-                        
-                    }
-
-                }
-//               else
-//               {
-//                    print("\n ######### Reached the end of the move! currentRow is \(self.currentRow) and spacesToMove is \(self.spacesToMove) and rabbitPos is \(self.rabbitPos) ########### \n")
-//                    print("\n At end of move, rabbitNode.position is \(self.rabbitNode.position)) and object is \(self.objectLandedOn.name) and objectLandedOn.position is \(self.objectLandedOn.position)\n")
-//                    if self.rabbitPos == self.spacesToMove  // if we've moved all the spaces
-//                    {
-//                        self.run(SKAction.sequence([
-//                            SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-//                        
-//                        self.collectObject(object: self.objectLandedOn!)
-//                        self.objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
-//                        self.objectLandedOn?.run(SKAction.removeFromParent()
-//                    )
-//                    }
-//               }
-            })
-        }
-        else // even numbered rows - move left (subtract from x)
-        {
-            print("\n On an even row now! \n")
-            let walk = SKAction.animate(with: walkLeftFrames, timePerFrame: 0.1)
-            let walkNumberTimes = SKAction.repeat(walk, count: numSpaces)
-            let playStepSound = SKAction.playSoundFileNamed("running3.mp3", waitForCompletion: false)
-            
-            let moveRight = SKAction.moveBy(x: -140 * CGFloat(spacesToMoveOnThisRow!), y: 0, duration: 1.0)
-            let repeatStepSound = SKAction.repeat(playStepSound, count: spacesToMoveOnThisRow!)
-            
-            let group = SKAction.group([walkNumberTimes, repeatStepSound, moveRight])
-            
-            rabbitNode.run(group, completion: {
-                
-                print("\n After moveRabbitOnRow move to numSpaces, rabbitNode.position.x is at \(self.rabbitNode.position.x) and rabbitPos is \(self.rabbitPos) and currentSpaceInRow is \(self.currentSpaceInRow)\n and currentRow is \(self.currentRow)")
-                
-                if self.moveEnded == false
-                {
-                    if numSpaces > 0
-                    {
-                        self.currentRow = self.currentRow + 1
-                        var moveDown = SKAction.moveBy(x: 0, y: self.rowHeight, duration: 1.0)
-                        
-                        
-                        if self.currentRow > 4  // if end of bottom row, go back up to top left
-                        {
-                            self.currentRow = 1
-                            moveDown = SKAction.moveBy(x: 0, y: self.bottomToTop, duration: 1.0)
-                        }
-                    
-                        self.rabbitPos += 2
-                        self.rabbitNode.run(moveDown, completion: {
-                            self.currentSpaceInRow = 1 // count spaces from right to left on even rows!
-                            
-                            self.moveRabbit(numSpaces: numSpaces - (self.spacesToRowEnd + 1)) {
-                                (result) -> Void in
-                                print(result)
-                            }// recursive call to keep this up until move ends  // recursive call to keep this up until move ends
-                        })
-                        
-                    }
-                }
-//                else
-//                {
-//                    print("\n ######### Reached the end of the move! currentRow is \(self.currentRow) and spacesToMove is \(self.spacesToMove) and rabbitPos is \(self.rabbitPos) ########### \n")
-//                    print("\n At end of move, rabbitNode.position is \(self.rabbitNode.position)) and object is \(self.objectLandedOn.name) and objectLandedOn.position is \(self.objectLandedOn.position)\n")
-//                    if self.rabbitPos == self.spacesToMove  // if we've moved all the spaces
-//                    {
-//                        self.run(SKAction.sequence([
-//                            SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-//                        
-//                        self.collectObject(object: self.objectLandedOn!)
-//                        self.objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
-//                        self.objectLandedOn?.run(SKAction.removeFromParent()
-//                    )
-//                    }
-//                }
-            })
-        }
-        
-
-    
 
         self.rabbitPos = self.rabbitPos + spacesToMoveOnThisRow!
         self.currentSpaceInRow = self.currentSpaceInRow + spacesToMoveOnThisRow!
         
+        // odd numbered rows - move right (add to x)
+        if (currentRow % 2 > 0)
+        {
+            print("\n ^^^^^^^^^ Before addLine rabbitPos is \(rabbitPos) and currentSpaceInRow is \(currentSpaceInRow)^^^^^^^^^ \n")
+            movePath.addLine(to: CGPoint(x: CGFloat((currentSpaceInRow - 1) * 140), y: 0))
+            
+            if self.moveEnded == false  // not on last row of move
+            {
+                
+ //               self.movePath.addLine(to: CGPoint(x: CGFloat(currentSpaceInRow * 140), y: self.rowHeight)) // add move down line to path
+                self.moveRabbit(numSpaces: numSpaces - (self.spacesToRowEnd + 1))
+                currentRow += 1
+            }
+        }
+        else // even numbered rows - move left (syv
+        {
+//            movePath.addLine(to: CGPoint(x: CGFloat(currentSpaceInRow * -140), y: 0))
+
+            if self.moveEnded == false  // not on last row of move
+            {
+ //               self.movePath.addLine(to: CGPoint(x: CGFloat(currentSpaceInRow * -140), y: self.rowHeight)) // add move down line to path
+                self.moveRabbit(numSpaces: numSpaces - (self.spacesToRowEnd + 1))
+                currentRow += 1
+            }
+            
+        }
+
+        // after accumulating all the path sections for the move, run the path
+        let walk = SKAction.animate(with: walkFrames, timePerFrame: 0.1)
+                let walkNumberTimes = SKAction.repeat(walk, count: spacesToMove)
+                let playStepSound = SKAction.playSoundFileNamed("running3.mp3", waitForCompletion: false)
+                let repeatStepSound = SKAction.repeat(playStepSound, count: spacesToMove)
+                
+                let followLine = SKAction.follow(movePath, asOffset: true, orientToPath: false, duration: TimeInterval(spacesToMove))
+                let group = SKAction.group([followLine, repeatStepSound])  //walkNumberTimes,
+                
+                rabbitNode.run(group, completion: {
+                    self.collectObject(object: self.objectLandedOn!)
+                    self.objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
+                    self.objectLandedOn?.run(SKAction.removeFromParent())
+                    self.movePath.closeSubpath()
+                })
+        
         print("\n At end of moveRabbitOnRow move to numSpaces, rabbitNode.position.x is at \(self.rabbitNode.position.x) and rabbitPos is \(self.rabbitPos) and currentSpaceInRow is \(self.currentSpaceInRow)\n")
     }
 
-/*
-    func moveRabbitDown()
-    {
-        let moveDown = SKAction.moveBy(x: 0, y: rowHeight, duration: 1.0)
-        rabbitNode.run(moveDown, completion: {
-            self.currentSpaceInRow = 1 // count spaces from right to left on even rows!
-            self.currentRow = self.currentRow + 1
-        })
-        
-    }
- 
-    func moveRabbitOneSpace()
-    {
-        var rabbitBody: SKPhysicsBody
-        let walk = SKAction.animate(with: walkFrames, timePerFrame: 0.1)
-        let playStepSound = SKAction.playSoundFileNamed("running3.mp3", waitForCompletion: false)
-        
-        rabbitBody = self.rabbitNode.physicsBody!
-        
-        // Turn contact bit mask back on for rabbit landing on object and move to the last space
-        rabbitBody.contactTestBitMask = PhysicsCategory.ValueObject
-        
-        print("\n At beginning of moveRabbitOneSpace, rabbitNode.position.x is at \(self.rabbitNode.position.x) and rabbitPos is \(self.rabbitPos)\n")
-        
-
-
-        let moveLastStep = SKAction.move(to: CGPoint(x: rabbitNode.position.x + forwardSpace, y: 0), duration: 1.0)
-        let groupLastStepActions = SKAction.group([walk, playStepSound, moveLastStep])
-        
-
-        
-        rabbitNode.run(groupLastStepActions, completion: {
-
-        })
-
-    }
- */
-    
-    func closureReturn(numSpaces: Int, withCompletionHandler: (_ result: Int) -> Void) {
-        if(numSpaces > 0){
-            withCompletionHandler(_: numSpaces)
-        }
-        else{
-            withCompletionHandler(_: numSpaces)
-        }
-    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
@@ -461,92 +285,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             }
             else if node.name == "firstNumber"
             {
+                
                 let firstValue = Int(firstNum.text!)
                 spacesToMove = firstValue!
-                
-                moveRabbit(numSpaces: spacesToMove) {
-                    (result) -> Void in
-                    print("/n&&&&&&&&&&&&Result of call to moveRabbit is \(result) &&&&&&&&&&&&\n")
-                    
-                    print("\n ######### Reached the end of the move! currentRow is \(self.currentRow) and spacesToMove is \(self.spacesToMove) and rabbitPos is \(self.rabbitPos) ########### \n")
-                    print("\n At end of move, rabbitNode.position is \(self.rabbitNode.position)) and object is \(self.objectLandedOn.name) and objectLandedOn.position is \(self.objectLandedOn.position)\n")
-                    if self.rabbitPos == self.spacesToMove  // if we've moved all the spaces
-                    {
-                        self.run(SKAction.sequence([
-                            SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-                        
-                        self.collectObject(object: self.objectLandedOn!)
-                        self.objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
-                        self.objectLandedOn?.run(SKAction.removeFromParent()
-                        )
-                    }
-                }
+                moveRabbit(numSpaces: spacesToMove)
             }
-
-      
-//            let firstValue = Int(firstNum.text!)
-//            spacesToMove = firstValue!
-//            closureReturn(numSpaces: spacesToMove) { (result) -> Void in
-//                print(result)
-//            }
 
             else if node.name == "secondNumber"
             {
+                
                 let secondValue = Int(secondNum.text!)
                 spacesToMove = secondValue!
-                
-                moveRabbit(numSpaces: spacesToMove) {
-                    (result) -> Void in
-                    print("/n&&&&&&&&&&&&Result of call to moveRabbit is \(result) &&&&&&&&&&&&\n")
-                    
-                    print("\n ######### Reached the end of the move! currentRow is \(self.currentRow) and spacesToMove is \(self.spacesToMove) and rabbitPos is \(self.rabbitPos) ########### \n")
-                    print("\n At end of move, rabbitNode.position is \(self.rabbitNode.position)")
-                        // and object is \(self.objectLandedOn.name) and objectLandedOn.position is \(self.objectLandedOn.position)\n"
-
-                        self.run(SKAction.sequence([
-                            SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-                        
-  //                      self.collectObject(object: self.objectLandedOn!)
- //                       self.objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
- //                       self.objectLandedOn?.run(SKAction.removeFromParent()
- //                       )
-                    }
-                }
-
+                moveRabbit(numSpaces: spacesToMove)
+            }
             
             else if node.name == "thirdNumber"
             {
+                
                 let thirdValue = Int(thirdNum.text!)
                 spacesToMove = thirdValue!
-
-                moveRabbit(numSpaces: spacesToMove) {
-                    (result) -> Void in
-                    print("/n&&&&&&&&&&&&Result of call to moveRabbit is \(result) &&&&&&&&&&&&\n")
-                    
-                    print("\n ######### Reached the end of the move! currentRow is \(self.currentRow) and spacesToMove is \(self.spacesToMove) and rabbitPos is \(self.rabbitPos) ########### \n")
-                    print("\n At end of move, rabbitNode.position is \(self.rabbitNode.position)) and object is \(self.objectLandedOn.name) and objectLandedOn.position is \(self.objectLandedOn.position)\n")
-                    if self.rabbitPos == self.spacesToMove  // if we've moved all the spaces
-                    {
-                        self.run(SKAction.sequence([
-                            SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false)]))
-                        
-                        self.collectObject(object: self.objectLandedOn!)
-                        self.objectLandedOn?.run(SKAction.scale(to: 0.8, duration: 0.1))
-                        self.objectLandedOn?.run(SKAction.removeFromParent()
-                        )
-                    }
-                }
+                moveRabbit(numSpaces: spacesToMove)
             }
-
-//            else if node.name == "thirdNumber"
-//            {
-//                let thirdValue = Int(thirdNum.text!)
-//                spacesToMove = thirdValue!
-//                
-//                moveRabbit(numSpaces: spacesToMove)
-//            }
         }
     }
+        
     
     func collectObject(object: SKNode)
     {  
@@ -555,6 +317,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             emitter.particlePosition = object.position
             
             addChild(emitter)
+            run(SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false))
         }
 
     }
@@ -577,17 +340,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         let rndX = arc4random_uniform(6)+1        //Generates Number from 1 to 6(number of columns).
             return Int(rndX)
     }
- /*
-    - (int)setRandomPosition:(UIImageView *)sender
-    {   int rndX = [self getRandomX];
-    int rndXCoord = 50 + 43*(rndX -1); // 50 is x of center of ladle when on leftmost space, 43 is number spaces between spaces' centers
-    int rndY = [self getRandomY];
-    int rndYCoord = 80 + 89*(rndY -1);
-    sender.center = CGPointMake(rndXCoord, rndYCoord);
-    [sender setHidden:NO];
-    return (rndX*10) + rndY;
-    }
- */
+
     
     func setRandomOperands()
     {
