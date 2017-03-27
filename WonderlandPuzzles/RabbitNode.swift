@@ -17,10 +17,13 @@ class RabbitNode: SKSpriteNode, EventListenerNode
         print("Rabbit added to scene")
         
         physicsBody!.categoryBitMask = PhysicsCategory.Rabbit
-        
-        
-//        physicsBody!.contactTestBitMask = PhysicsCategory.ValueObject
+        physicsBody!.contactTestBitMask = PhysicsCategory.ValueObject
         
 //        physicsBody!.collisionBitMask = PhysicsCategory.ValueObject
+        
+//        let rabbitBodySize = CGSize(width: 100, height: 100)
+//        physicsBody = SKPhysicsBody(rectangleOf: rabbitBodySize)
+        physicsBody!.isDynamic = false
+        
     }
 }
