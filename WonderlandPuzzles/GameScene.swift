@@ -163,7 +163,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             
             print("\n Added object \(key) with image \(value) \n at \(objPos)")
             print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
-            
         }
  
         // fill in blanks with blank objects
@@ -187,80 +186,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         print(objectPlacementArray)
         print("\n\n")
         print(objectNodeArray)
-
-        
-/*
-         
-         var rabbitBody: SKPhysicsBody
-         rabbitBody = self.rabbitNode.physicsBody!
-         rabbitBody.categoryBitMask = PhysicsCategory.Rabbit
-         rabbitBody.contactTestBitMask = PhysicsCategory.ValueObject
-         
-         
-         
-//            objectNodeArray.append(ObjectNode(imageNamed: value) as? ObjectNode)
-            objectNodeArray.append(ObjectNode(imageNamed: value))
-            objectNodeArray[index]?.name = key
- 
-            var (rndColumn, rndRow, objPos) = getRandomPosition()
-            
-            // if object is already in that space, choose another space
-            while objectPlacementArray[rndColumn - 1][rndRow - 1] == 1
-            {
-              (rndColumn, rndRow, objPos) = getRandomPosition()
-            }
-            objectPlacementArray[rndColumn - 1][rndRow - 1] = 1
-            objectNodeArray[index]?.position = objPos
-            objectNodeArray[index]?.physicsBody? = SKPhysicsBody(rectangleOf: CGSize(width: (objectNodeArray[index]?.size.width)!, height: (objectNodeArray[index]?.size.height)!))
-            objectNodeArray[index]?.physicsBody?.isDynamic = false
-            objectNodeArray[index]?.physicsBody?.categoryBitMask = PhysicsCategory.ValueObject
-            objectNodeArray[index]?.physicsBody?.contactTestBitMask = PhysicsCategory.Rabbit
-            
-            
-            objectNodeArray[index]?.zPosition = 6
-            objectNodeArray[index]?.setScale(2.2)
-            addChild(objectNodeArray[index]!)
-            
-            print("\n\n The objectNodeArray \(index) value is \(objectNodeArray[index]?.name). Its position is \(objectNodeArray[index]?.position) at  row \(rndRow) and column \(rndColumn)\n\n")
-            
-
-            index += 1
-        }  // end of for (key, value in valueObjects
-        
- 
-        
-        // fill in blanks with blank objects
-        for x in 0 ..< objectPlacementArray.count
-        {
-            for y in 0 ..< objectPlacementArray[x].count
-            {
-                if objectPlacementArray[x][y] == 0
-                {
-                    objectPlacementArray[x][y] = 2
-                    
-                    objectNodeArray.append(SKSpriteNode(imageNamed: "black_club") as! ObjectNode)
-                    objectNodeArray[index]?.name = "blank"
-                    objectNodeArray[index]?.setScale(2.0)
-                    objectNodeArray[index]?.position = getPosition(column: x, row: y) // position of empty space
-                    objectNodeArray[index]?.physicsBody? = SKPhysicsBody(rectangleOf: CGSize(width: (objectNodeArray[index]?.size.width)!, height: (objectNodeArray[index]?.size.height)!))
-                    objectNodeArray[index]?.physicsBody?.isDynamic = false
-                    objectNodeArray[index]?.physicsBody?.categoryBitMask = PhysicsCategory.ValueObject
-                    objectNodeArray[index]?.physicsBody?.contactTestBitMask = PhysicsCategory.ValueObject
-                    objectNodeArray[index]?.physicsBody?.contactTestBitMask = PhysicsCategory.ValueObject
-                    objectNodeArray[index]?.isHidden = false
-                    addChild(objectNodeArray[index]!)
-                    
-                    print("\n\n The objectNodeArray \(index) value is \(objectNodeArray[index]?.name). Its position is \(objectNodeArray[index]?.position) \n\n")
-                    
-                    index += 1
-                }
-            }
-        }
-            print(objectPlacementArray)
-            print("\n\n")
-            print(objectNodeArray)
- 
- */
     }
     
 
