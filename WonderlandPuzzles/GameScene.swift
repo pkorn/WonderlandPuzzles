@@ -95,14 +95,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     override func didMove(to view: SKView)
     {
-
-//        enumerateChildNodes(withName: "//*", using: { node, _ in
-//            if let EventListenerNode = node as? EventListenerNode
-//            {
-//                EventListenerNode.didMoveToScene()
-//            }
-//        })
-        
         placeValueObjects()
         
         rabbitNode = childNode(withName: "//whiteRabbit") as! RabbitNode
@@ -119,18 +111,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         setScoreLabel(score: score)
     }
     
-
+/*
     override func update(_ currentTime: TimeInterval)
     {
- //       if endedMoveSequence == true
- //       {
- //           rabbitNode.run(SKAction.moveBy(x: 0, y: 0, duration: 1.0))
- //           {
- //               self.endedMoveSequence = false
- //           }
- //       }
+        if endedMoveSequence == true
+        {
+            rabbitNode.run(SKAction.moveBy(x: 0, y: 0, duration: 1.0))
+            {
+                self.endedMoveSequence = false
+            }
+        }
     }
-
+*/
     func placeValueObjects()
     {
         let valueObjects: [String: String] = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp"]
@@ -140,13 +132,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         objectPlacementArray[0][0] = 1  // Don't place any objects on first space
         print(objectPlacementArray)
         
-        var objectNodeArray = [objectNode]
-        
- //       objectNode = ObjectNode(objectName: "pig", imageName: "pig_transp")
-
- //       addChild(objectNode)
-
-        var index = 0
         for (key, value) in valueObjects
         {
             var (rndColumn, rndRow, objPos) = getRandomPosition()
@@ -183,12 +168,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 }
             }
         }
-        print(objectPlacementArray)
-        print("\n\n")
-        print(objectNodeArray)
     }
     
-
     
     func getRandomPosition() -> (Int, Int, CGPoint)
     {
@@ -219,8 +200,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         
         return (spritePos)
     }
-    
-    
     
     
     func didBegin(_ contact: SKPhysicsContact)
@@ -268,16 +247,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         moveEnded = false
         rabbitPos = 0 // keep track of whether rabbit has moved all the spaces yet
         spacesToRowStart = currentSpaceInRow - 1
-        print("\n\n spacesToRowStart = \(spacesToRowStart) \n\n")
-        
-        print("\n numSpacesInRow = \(numSpacesInRow) and currentSpaceInRow = \(currentSpaceInRow) \n")
-
         
         // if moving forward
         if (numSpaces > 0)
         {
             spacesToRowEnd = numSpacesInRow - currentSpaceInRow
-            print("\n Going forward, spacesToRowEnd is \(spacesToRowEnd)\n")
             
             // if move stays on current row
             if (numSpaces <= spacesToRowEnd)
@@ -295,7 +269,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         else if (numSpaces < 0)    // if moving backwards
         {
             // if move stays on current row
-//            if (abs(numSpaces) <= currentSpaceInRow - 1)
             if (abs(numSpaces) <= currentSpaceInRow - 1)
             {
                 moveEnded  = true  // move will end on this row
@@ -307,8 +280,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             
             moveRabbitOnRow(numSpaces: numSpaces)
         }
-        
-        
     }
     
  
@@ -339,8 +310,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         }
         else // move continues past this row
         {
-            print("Moved past end of row")
-            
             if (numSpaces > 0) // moving forward
             {
                 spacesToMoveOnThisRow = spacesToRowEnd
@@ -397,11 +366,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 print("\n !!!!!!!! numSpaces is 0 !!!!!!!!! \n")  // this should never happen
             }
-            
-            
-
         }
-        print("\n At end of moveRabbitOnRow move to numSpaces, rabbitNode.position.x is at \(self.rabbitNode.position.x) and rabbitPos is \(self.rabbitPos) and current row is \(currentRow) and currentSpaceInRow is \(self.currentSpaceInRow)\n")
     }
 
     func doMoveSequence()
@@ -489,10 +454,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 self.collectObject(object: self.objectLandedOn)
             }
-   
         })
-
     }
+    
     
     func collectObject(object: SKNode)
     {
@@ -504,7 +468,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             run(SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false))
             object.isHidden = true
             
-            var collectedObject = object.name
+            let collectedObject = object.name
             
             print("\n\n The object collected was \(collectedObject)\n\n")
             
@@ -516,7 +480,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             
             scoreLabel.text = "Score: \(score)"
         }
-        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
@@ -581,7 +544,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     func getRandomNumber() -> Int
     {
-        var rndOp: Int =  Int(arc4random_uniform(3)+1)    // Generates Number from 1 to 3. Change to (9)+1 in final version!
+        let rndOp: Int =  Int(arc4random_uniform(3)+1)    // Generates Number from 1 to 3. Change to (9)+1 in final version!
         
         return rndOp
     }
