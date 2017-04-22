@@ -27,7 +27,7 @@ class GameViewController: UIViewController {
                 // Present the scene
                 view.presentScene(scene)
             }
-            view.showsPhysics = true
+//            view.showsPhysics = true
             
             view.ignoresSiblingOrder = true
             

@@ -43,6 +43,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     let secondNum = SKLabelNode(fontNamed: "Futura")
     let thirdNum = SKLabelNode(fontNamed: "Futura")
     let scoreLabel = SKLabelNode(fontNamed: "Futura")
+    let equationDisplay = SKLabelNode(fontNamed: "Futura")
+    var moveLabel = SKLabelNode()
+    var clearLabel = SKLabelNode()
+    var deleteLabel = SKLabelNode()
+    var plusSprite = SKSpriteNode()
+    var minusSprite = SKSpriteNode()
+    var timesSprite = SKSpriteNode()
+    var equalsSprite = SKSpriteNode()
+    var extraOperation = ""
     
     var spacesToMove: Int = 0
     var plus: SKSpriteNode!
@@ -69,7 +78,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var actionsArray: [SKAction] = []
     var endedMoveSequence = false
     var spacesOnPrevRow = 0
- 
+    var operatorCount = 0
+    var digitEntered = false
+    var answer: Int = 0
+    var numberExpected = true   // expect user to enter number or operator
 
     private let walkingActionKey = "action_walking"
     private let walkRightFrames = [SKTexture(imageNamed: "whiteRabbit_100x200"),
@@ -107,8 +119,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         physicsWorld.contactDelegate = self
         
         setRandomOperands()
-        
+        operatorCount = 0
         setScoreLabel(score: score)
+        setEquationDisplay()
+        moveLabel = childNode(withName: "Move") as! SKLabelNode
+        moveLabel.name = "move"
+        moveLabel.isHidden = true
+        clearLabel = childNode(withName: "Clear") as! SKLabelNode
+        clearLabel.name = "clear"
+        clearLabel.isHidden = true
+        deleteLabel = childNode(withName: "Delete") as! SKLabelNode
+        deleteLabel.name = "delete"
+        deleteLabel.isHidden = true
+        plusSprite = childNode(withName: "plus") as! SKSpriteNode
+        plusSprite.name = "plus"
+        minusSprite = childNode(withName: "minus") as! SKSpriteNode
+        minusSprite.name = "minus"
+        timesSprite = childNode(withName: "times") as! SKSpriteNode
+        timesSprite.name = "times"
+        equalsSprite = childNode(withName: "equals") as! SKSpriteNode
+        equalsSprite.name = "equals"
     }
     
 /*
@@ -454,7 +484,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 self.collectObject(object: self.objectLandedOn)
             }
+            // move has been run, get new numbers for a new equation
+            self.getNewNumbers()
         })
+
     }
     
     
@@ -470,11 +503,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             
             let collectedObject = object.name
             
-            print("\n\n The object collected was \(collectedObject)\n\n")
+            print("\n\n The object collected was \(String(describing: collectedObject))\n\n")
             
             let objectValue = objectValues[collectedObject!]
             
-            print("\n\n The value of object \(collectedObject) is \(objectValue) \n\n")
+            print("\n\n The value of object \(String(describing: collectedObject)) is \(String(describing: objectValue)) \n\n")
             
             score += objectValue!
             
@@ -482,69 +515,300 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         }
     }
     
+    
+    func getNewNumbers()
+    {
+        // get new numbers to make next equation
+        firstNum.text = String(getRandomNumber())
+        firstNum.isHidden = false
+        secondNum.text = String(getRandomNumber())
+        secondNum.isHidden = false
+        thirdNum.text = String(getRandomNumber())
+        thirdNum.isHidden = false
+        
+        operatorCount = 0
+        
+        plusSprite.isHidden = false
+        minusSprite.isHidden = false
+        timesSprite.isHidden = false
+        equalsSprite.isHidden = false
+        
+        clearLabel.isHidden = true
+        deleteLabel.isHidden = true
+        moveLabel.isHidden = true
+    }
+    
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         for touch in touches
         {
             let location = touch.location(in: self)
             let node: SKNode = self.atPoint(location)
-            if node.name == "plus"
-            {
-                print("Touched the plus sign")
-            }
-            else if node.name == "minus"
-            {
-                print("Touched the minus sign")
-            }
-            else if node.name == "times"
-            {
-                print("Touched the times sign")
-            }
-            else if node.name == "equals"
-            {
-                print("Touched the equals sign")
-            }
-            else if node.name == "firstNumber"
-            {
-                
-                let firstValue = Int(firstNum.text!)
-                spacesToMove = firstValue!
-                movesToMake.removeAll()
-                
-                self.endedMoveSequence = false
-                moveRabbit(numSpaces: spacesToMove)
-                doMoveSequence()
-            }
-
-            else if node.name == "secondNumber"
-            {
-                
-                let secondValue = Int(secondNum.text!)
-                spacesToMove = secondValue!
-                movesToMake.removeAll()
-
-                self.endedMoveSequence = false
-                moveRabbit(numSpaces: spacesToMove)
-                doMoveSequence()
-            }
             
-            else if node.name == "thirdNumber"
+            if !numberExpected
             {
-                let thirdValue = Int(thirdNum.text!)
-                spacesToMove = thirdValue!
-                movesToMake.removeAll()
+                if node.name == "plus"
+                {
+                    print("Touched the plus sign")
+                    node.isHidden = true
+                    equationDisplay.text! = equationDisplay.text! +  " +"
+                   
+                    operationPressed(operation: "+")
+                    numberExpected = true
+                }
+                else if node.name == "minus"
+                {
+                    print("Touched the minus sign")
+                    node.isHidden = true
+                    equationDisplay.text! = equationDisplay.text! +  " -"
+                    operatorCount += 1
+                    
+                    operationPressed(operation: "-")
+                    numberExpected = true
+                }
+                else if node.name == "times"
+                {
+                    print("Touched the times sign")
+                    node.isHidden = true
+                    equationDisplay.text! = equationDisplay.text! +  " x"
+                    run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
+                    operatorCount += 1
+                    
+                    operationPressed(operation: "x")
+                    numberExpected = true
+                }
+                else if node.name == "equals"
+                {
+                    print("Touched the equals sign")
+                    node.isHidden = true
+                    equationDisplay.text! = equationDisplay.text! +  " ="
+                    
+                    equalsPressed()
+                }
+                else if node.name == "move"
+                {
+                    print("Touched the move label")
+                    digitEntered = false
+                    moveRabbit(numSpaces: answer)
+                    doMoveSequence()
+                    clear()
+                    numberExpected = true
+                }
+            }
+            else  // if numberExpected
+            {
+                if node.name == "firstNumber" || node.name == "secondNumber" || node.name == "thirdNumber"
+                {
+                        let thisNumber = node as! SKLabelNode
+                        spacesToMove = Int(thisNumber.text!)!
+                        thisNumber.isHidden = true
+                        digitPressed(numberPressed: spacesToMove)
+                        numberExpected = false
+                }
+            }
+                    
+            if node.name == "clear"
+            {
+                print("Touched the clear label")
+                clear()
+                numberExpected = true
+            }
+            else if node.name == "delete"
+            {
+                print("Touched the delete label")
+                delete()
+            // If deleting the 2nd operator, both it and the third operator that was hidden must be restored. Save what the 3rd operator was, or check against operationStack
+            }
+
+            if node.name != "delete" && extraOperation == ""
+            {
+                if plusSprite.isHidden && minusSprite.isHidden
+                {
+                    timesSprite.isHidden = true
+                    extraOperation = "x"
+                }
+                else if plusSprite.isHidden && timesSprite.isHidden
+                {
+                    minusSprite.isHidden = true
+                    extraOperation = "-"
+                }
+                else if minusSprite.isHidden && timesSprite.isHidden
+                {
+                    plusSprite.isHidden = true
+                    extraOperation = "+"
+                }
+            }
+
+        }
+    }
+    
+    func digitPressed(numberPressed: Int)
+    {
+        run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
+        print("\n Digit pressed is \(numberPressed)\n")
+        print("\n Equation is : \(String(describing: equationDisplay.text)) \n")
+        equationDisplay.text! = equationDisplay.text! +  " " + String(numberPressed)
+        
+        // send digit to Calculator
+        
+        pushOperand(operand: numberPressed)
+        
+        print("\n Operand Stack is \n \(operandStack) \n")
+        digitEntered = true
+        clearLabel.isHidden = false
+        deleteLabel.isHidden = false
+    }
+
+    func operationPressed(operation: String)
+    {
+        run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
+        print("\n Operator sent to Operand Stack is \(operation)\n")
+        pushOperation(operation: operation)
+    
+        print("\n Operation Stack is \n \(operationStack) \n")
+    }
+    
+    func equalsPressed()
+    {
+        var strAnswer = ""
+        answer = 0
+        
+        print("Equals pressed; Equation being evaluated.")
+        run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
+        
+        answer = evaluateEquation()
+        strAnswer = String(answer)
+        print("\n\n The answer is \(strAnswer)\n\n")
+        equationDisplay.text! = equationDisplay.text! + " " + strAnswer
+
+        hideNumsAndOps()
+    }
+    
+    func clear()
+    {
+        self.equationDisplay.text = ""
+        operandStack.removeAll()
+        operationStack.removeAll()
+        movesToMake.removeAll()
+        showNumsAndOps()
+    }
+    
+    func delete()
+    {
+        print("\n At start of Delete, extra operation is \(extraOperation) \n")
+        if self.equationDisplay.text != nil
+        {
+            if operandStack.count > operationStack.count  // deleting an operand
+            {
+                print("\n The number of operands on the stack is \(operandStack.count)\n")
+                let poppedOperand = popOperand()
+                print("The operand removed was \(poppedOperand)")
+                let poppedOperandString = " " + String(poppedOperand)
+                self.equationDisplay.text = self.equationDisplay.text?.replacingOccurrences(of: poppedOperandString, with: "")
                 
-                self.endedMoveSequence = false
-                moveRabbit(numSpaces: spacesToMove)
-                doMoveSequence()
+                restoreNumOrOp(value:String(poppedOperand))
+                numberExpected = true
+            }
+            else   // deleting an operator
+            {
+                if operationStack.count > 0
+                {
+                    let poppedOperation = popOperation()
+                    print("The operation removed was \(poppedOperation)")
+                    let poppedOperationString = " " + poppedOperation
+                    self.equationDisplay.text = self.equationDisplay.text?.replacingOccurrences(of: poppedOperationString, with: "")
+                    
+                    restoreNumOrOp(value:poppedOperation) // restore operation to choices
+                }
+//                if operationStack.count > 0  // deleting 2nd operator, must restore 3rd operator to choices (count will have been decremented to 1 above)
+                if extraOperation != ""
+                {
+                    if extraOperation == "+"
+                    {
+                        plusSprite.isHidden = false
+                    }
+                    else if extraOperation == "-"
+                    {
+                        minusSprite.isHidden = false
+                    }
+                    else if extraOperation == "x"
+                    {
+                        timesSprite.isHidden = false
+                    }
+                    print("\n Extra operation is \(extraOperation) \n")
+                    extraOperation = ""
+                }
+                numberExpected = false
             }
         }
     }
     
     
+    func showNumsAndOps()
+    {
+        firstNum.isHidden = false
+        secondNum.isHidden = false
+        thirdNum.isHidden = false
+        
+        plusSprite.isHidden = false
+        minusSprite.isHidden = false
+        timesSprite.isHidden = false
+        equalsSprite.isHidden = false
+        
+        clearLabel.isHidden = true
+        deleteLabel.isHidden = true
+        moveLabel.isHidden = true
+    }
+    
+    func hideNumsAndOps()
+    {
+        firstNum.isHidden = true
+        secondNum.isHidden = true
+        thirdNum.isHidden = true
+        
+        plusSprite.isHidden = true
+        minusSprite.isHidden = true
+        timesSprite.isHidden = true
+        equalsSprite.isHidden = true
+        
+        clearLabel.isHidden = false
+        deleteLabel.isHidden = false
+        moveLabel.isHidden = false
+    }
+    
+    func restoreNumOrOp(value:String)
+    {
+        if value == firstNum.text
+        {
+            firstNum.isHidden = false
+        }
+        else if value == secondNum.text
+        {
+            secondNum.isHidden = false
+        }
+        else if value == thirdNum.text
+        {
+            thirdNum.isHidden = false
+        }
+        else if value == "+"
+        {
+            plusSprite.isHidden = false
+        }
+        else if value == "-"
+        {
+            minusSprite.isHidden = false
+        }
+        else if value == "x"
+        {
+            timesSprite.isHidden = false
+        }
+    }
+
+    
     func getRandomNumber() -> Int
     {
-        let rndOp: Int =  Int(arc4random_uniform(3)+1)    // Generates Number from 1 to 3. Change to (9)+1 in final version!
+        let rndOp: Int =  Int(arc4random_uniform(9)+1)    // Generates Number from 1 to 3. Change to (9)+1 in final version!
         
         return rndOp
     }
@@ -564,10 +828,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     func setRandomOperands()
     {
-        
-
-//        firstNum.text = String(getRandomNumber())
-        firstNum.text = "3"
+        firstNum.text = String(getRandomNumber())
+//        firstNum.text = "3"
         firstNum.name = "firstNumber"
         firstNum.fontSize = 65
         firstNum.fontColor = .black
@@ -578,8 +840,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         addChild(firstNum)
         
         
- //       secondNum.text = String(-1 * (getRandomNumber()))
-        secondNum.text = "2"
+        secondNum.text = String(getRandomNumber())
+//        secondNum.text = "2"
         secondNum.name = "secondNumber"
         secondNum.fontSize = 65
         secondNum.fontColor = .black
@@ -588,8 +850,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         secondNum.zPosition = 8
 
 
-//        thirdNum.text = String(-1 * (getRandomNumber()))
-        thirdNum.text = "-3"
+//        thirdNum.text = String(getRandomNumber())
+        thirdNum.text = "9"
         thirdNum.name = "thirdNumber"
         thirdNum.fontSize = 65
         thirdNum.fontColor = .black
@@ -601,15 +863,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         // if second operand button same as 1st button, get another digit
         while firstNum.text  == secondNum.text
         {
-            secondNum.text = String(-1 * (getRandomNumber()))
+            secondNum.text = String(getRandomNumber())
         }
         // if third operand button same as 1st or 2nd button, get another digit
         while thirdNum.text == firstNum.text || thirdNum.text == secondNum.text
         {
-            thirdNum.text = String(-1 * (getRandomNumber()))
+            thirdNum.text = String(getRandomNumber())
         }
         
-
         addChild(secondNum)
         addChild(thirdNum)
     }
@@ -627,6 +888,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         scoreLabel.position = CGPoint(x: -350, y: 583)
         scoreLabel.zPosition = 8
         addChild(scoreLabel)
+    }
+    
+    func setEquationDisplay()
+    {
+        equationDisplay.text = ""
+        equationDisplay.fontSize = 65
+        equationDisplay.fontColor = SKColor(red: 0.1, green: 0.5, blue: 1.0, alpha: 1.0)
+        equationDisplay.horizontalAlignmentMode = .left
+        equationDisplay.position = CGPoint(x: -318, y: -483)
+        equationDisplay.zPosition = 8
+        addChild(equationDisplay)
     }
     
 

@@ -58,11 +58,15 @@ var scoreStore = [Int]()
    func evaluateEquation() -> Int
     {
         var result: Int = 0
-        var operation: String = operationStack[0]
+        var thisOperation: String = ""
+        
+        print ("\n Operation Stack in evaluateEquation is \(operationStack)\n")
+        print ("\n First element of Operation Stack in evaluateEquation is \(operationStack[0])\n")
+        thisOperation = operationStack[0]
         
         if operationStack.count > 1
         {
-            if (operationStack.removeLast()) == "x"
+            if (operationStack[operationStack.count - 1]) == "x"
             {
                 let pop1 = popOperand()
                 let pop2 = popOperand()
@@ -76,18 +80,18 @@ var scoreStore = [Int]()
         let op1 = operandStack[0]
         let op2 = operandStack[1]
         
-        if (operation == "+") {result = op1 + op2}
-        else if operation == "x" {result = op1 * op2}
-        else if operation == "-" {result = op1 - op2}
+        if (thisOperation == "+") {result = op1 + op2}
+        else if thisOperation == "x" {result = op1 * op2}
+        else if thisOperation == "-" {result = op1 - op2}
         
         if operandStack.count > 2
         {
             let op3 = operandStack[2]
-            operation = operationStack[1];
+            thisOperation = operationStack[1];
                 
-            if operation == "+" {result = result + op3}
-            else if operation == "x" {result = result * op3}
-            else if operation == "-" {result = result - op3}
+            if thisOperation == "+" {result = result + op3}
+            else if thisOperation == "x" {result = result * op3}
+            else if thisOperation == "-" {result = result - op3}
         }
         return result;
     }

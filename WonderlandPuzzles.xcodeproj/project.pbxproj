@@ -142,12 +142,12 @@
 				44D248BB1E5E0EA00034FE49 /* GameScene.swift */,
 				44D248F41E60544C0034FE49 /* RabbitNode.swift */,
 				44D249111E607CB50034FE49 /* ObjectNode.swift */,
+				44D249251E63DFC10034FE49 /* Calculator.swift */,
 				44D248BD1E5E0EA00034FE49 /* GameViewController.swift */,
 				44D248BF1E5E0EA00034FE49 /* Main.storyboard */,
 				44D248C21E5E0EA00034FE49 /* Assets.xcassets */,
 				44D248C41E5E0EA00034FE49 /* LaunchScreen.storyboard */,
 				44D248C71E5E0EA00034FE49 /* Info.plist */,
-				44D249251E63DFC10034FE49 /* Calculator.swift */,
 			);
 			path = WonderlandPuzzles;
 			sourceTree = "<group>";
