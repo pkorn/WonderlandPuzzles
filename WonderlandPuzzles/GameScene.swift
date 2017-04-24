@@ -60,7 +60,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var score: Int = 0
     var lives: Int = 3
     
-    let spaceSize: CGFloat = 200.0  // was 140.0
+    let spaceSize: CGFloat = 227.0  // was 140.0
     
     var rowDirection: CGFloat = 1.0 // will set this to 1.0 for moving right, -1.0 for moving left
     
@@ -69,11 +69,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var rabbitPos = 0
     var currentSpaceInRow: Int = 1
     
-    let numSpacesInRow = 6
-    let rowHeight:CGFloat = -300  // was -280
+    let numSpacesInRow = 10  // was 6
+    let rowHeight:CGFloat = -270  // was -280
     let bottomToTop:CGFloat = 840
     var currentRow = 1
-    var spacesToRowEnd = 5
+    var spacesToRowEnd = 9
     var spacesToRowStart = 0
     var movesToMake: [CGFloat] = []
     var actionsArray: [SKAction] = []
@@ -108,10 +108,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     override func didMove(to view: SKView)
     {
-//        background.position = CGPoint(x: 100, y: 200)
-        
-//        addChild(background)
-        
         placeValueObjects()
         
         rabbitNode = childNode(withName: "//whiteRabbit") as! RabbitNode
@@ -162,8 +158,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     {
         let valueObjects: [String: String] = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp"]
         
-        // initialize 6X4 2-dimensional array with 0's
-        var objectPlacementArray: [[Int]] = Array(repeating: Array(repeating: 0, count: 6), count: 6)
+        // initialize 10X4 2-dimensional array with 0's
+        var objectPlacementArray: [[Int]] = Array(repeating: Array(repeating: 0, count: 4), count: 10)
         objectPlacementArray[0][0] = 1  // Don't place any objects on first space
         print(objectPlacementArray)
         
@@ -195,7 +191,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                     objectPlacementArray[x][y] = 2
                     
                     objectNode = ObjectNode(objectName: "blank", imageName: "black_club", objectPosition: getPosition(column: x, row: y))
-                    objectNode?.isHidden = false
+                    objectNode?.isHidden = true
                     addChild(objectNode)
                     
                     print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
@@ -208,16 +204,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     func getRandomPosition() -> (Int, Int, CGPoint)
     {
-        let rndColumn: Int = Int(arc4random_uniform(6)+1)    // Generates Number from 1 to 6 for columns.
-        let rndRow: Int = Int(arc4random_uniform(6)+1)    // Generates Number from 1 to 6 for rows.
+        let rndColumn: Int = Int(arc4random_uniform(10)+1)    // Generates Number from 1 to 10 for columns.
+        let rndRow: Int = Int(arc4random_uniform(4)+1)    // Generates Number from 1 to 4 for rows.
         
         print("\n\nColumn is \(rndColumn) and Row is \(rndRow) \n\n")
         
 //        let rndX = -310 + (125 * (rndColumn - 1))
 //        let rndY = 370 + (-220 * (rndRow - 1))
         
-        let rndX = -440 + (180 * (rndColumn - 1))
-        let rndY = 635 + (-235 * (rndRow - 1))
+        let rndX = -938 + (205 * (rndColumn - 1))
+        let rndY = 365 + (-218 * (rndRow - 1))
         
         let rndPos: CGPoint = CGPoint(x: rndX, y: rndY)
         
@@ -231,8 +227,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     {
         print("\n\nColumn is \(column) and Row is \(row) \n\n")
         
-        let spritePosX = -440 + (180 * (column))
-        let spritePosY = 635 + (-235 * (row))
+        let spritePosX = -938 + (205 * (column))
+        let spritePosY = 365 + (-218 * (row))
         
         let spritePos: CGPoint = CGPoint(x: spritePosX, y: spritePosY)
         
@@ -842,7 +838,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         firstNum.fontSize = 65
         firstNum.fontColor = .black
         firstNum.horizontalAlignmentMode = .left
-        firstNum.position = CGPoint(x: -500, y: -930)
+        firstNum.position = CGPoint(x: -950, y: -530)
         firstNum.zPosition = 8
         
         addChild(firstNum)
@@ -854,7 +850,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         secondNum.fontSize = 65
         secondNum.fontColor = .black
         secondNum.horizontalAlignmentMode = .left
-        secondNum.position = CGPoint(x: -300, y: -930)
+        secondNum.position = CGPoint(x: -750, y: -530)
         secondNum.zPosition = 8
 
 
@@ -864,7 +860,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         thirdNum.fontSize = 65
         thirdNum.fontColor = .black
         thirdNum.horizontalAlignmentMode = .left
-        thirdNum.position = CGPoint(x: -100, y: -930)
+        thirdNum.position = CGPoint(x: -550, y: -530)
         thirdNum.zPosition = 8
 
         //  Prevent duplicate digits
@@ -893,7 +889,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         scoreLabel.fontColor = SKColor(red: 0.1, green: 0.5, blue: 1.0, alpha: 1.0)
 //        scoreLabel.fontColor = .blue
         scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.position = CGPoint(x: -500, y: 910)
+        scoreLabel.position = CGPoint(x: -950, y: 502)
         scoreLabel.zPosition = 8
         addChild(scoreLabel)
     }
@@ -904,7 +900,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         equationDisplay.fontSize = 65
         equationDisplay.fontColor = SKColor(red: 0.1, green: 0.5, blue: 1.0, alpha: 1.0)
         equationDisplay.horizontalAlignmentMode = .left
-        equationDisplay.position = CGPoint(x: -500, y: -750)
+        equationDisplay.position = CGPoint(x: -950, y: -442)
         equationDisplay.zPosition = 8
         addChild(equationDisplay)
     }
