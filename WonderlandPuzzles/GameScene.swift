@@ -15,17 +15,17 @@ protocol EventListenerNode
 
 struct PhysicsCategory
 {
-    static let None:           UInt32 = 0          // 0
-    static var Rabbit:         UInt32 = 0b1        // 1
-    static let ValueObject:    UInt32 = 0b10       // 2
-    static var Bubbles1:       UInt32 = 0b100      // 4
-    static var Pig1:           UInt32 = 0b1000     // 8
-    static var Ladle1:         UInt32 = 0b10000    // 16
-    static var Bottle1:        UInt32 = 0b100000   // 32
-    static var Shaker1:        UInt32 = 0b1000000  // 64
-    static var Cauldron1:      UInt32 = 0b1000000  // 128
-    static var Blank:          UInt32 = 0b10000000 // 256
-    
+    static let None:           UInt32 = 0           // 0
+    static var Rabbit:         UInt32 = 0b1         // 1
+    static let ValueObject:    UInt32 = 0b10        // 2
+    static var Bubbles1:       UInt32 = 0b100       // 4
+    static var Pig1:           UInt32 = 0b1000      // 8
+    static var Ladle1:         UInt32 = 0b10000     // 16
+    static var Bottle1:        UInt32 = 0b100000    // 32
+    static var Shaker1:        UInt32 = 0b1000000   // 64
+    static var Cauldron1:      UInt32 = 0b1000000   // 128
+    static var Blank:          UInt32 = 0b10000000  // 256
+    static var Invitation:     UInt32 = 0b100000000 // 512
 //
 }
 class GameScene: SKScene, SKPhysicsContactDelegate
@@ -34,6 +34,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var path: SKTileMapNode!
     var rabbitNode: RabbitNode!
     var objectNode: ObjectNode!
+    var invitationNode: ObjectNode!
     
     var fgNode: SKNode!
     var hearts: SKSpriteNode!
@@ -44,6 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     let secondNum = SKLabelNode(fontNamed: "Futura")
     let thirdNum = SKLabelNode(fontNamed: "Futura")
     let scoreLabel = SKLabelNode(fontNamed: "Futura")
+    let bonusLabel = SKLabelNode(fontNamed: "Futura")
     let equationDisplay = SKLabelNode(fontNamed: "Futura")
     var moveLabel = SKLabelNode()
     var clearLabel = SKLabelNode()
@@ -54,11 +56,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var equalsSprite = SKSpriteNode()
     var extraOperation = ""
     
-    var spacesToMove: Int = 0
+    var digitSelected: Int = 0
+    var spacesToMoveOnThisRow: Int = 0
     var plus: SKSpriteNode!
     
     var score: Int = 0
     var lives: Int = 3
+
     
     let spaceSize: CGFloat = 227.0  // was 140.0
     
@@ -83,7 +87,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var digitEntered = false
     var answer: Int = 0
     var numberExpected = true   // expect user to enter number or operator
-
+    var usedTimes = false
+    var usedAllOperations = false
+    var numberOfObjectsCollected = 0
+    
     private let walkingActionKey = "action_walking"
     private let walkRightFrames = [SKTexture(imageNamed: "whiteRabbit_100x200"),
                               SKTexture(imageNamed: "whiteRabbit2"),
@@ -113,7 +120,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         rabbitNode = childNode(withName: "//whiteRabbit") as! RabbitNode
         
         rabbitNode?.position = CGPoint(x: 0, y: -100)
-        print("\n Before move, Rabbit is at \(rabbitNode.position.x) \n")
+//        print("\n Before move, Rabbit is at \(rabbitNode.position.x) \n")
       
 //        SKTAudio.sharedInstance().playBackgroundMusic("magntron__gamemusic.mp3")
         
@@ -122,6 +129,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         setRandomOperands()
         operatorCount = 0
         setScoreLabel(score: score)
+        setBonusLabel(bonus: "")
         setEquationDisplay()
         moveLabel = childNode(withName: "Move") as! SKLabelNode
         moveLabel.name = "move"
@@ -156,12 +164,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate
 */
     func placeValueObjects()
     {
-        let valueObjects: [String: String] = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp"]
+        let valueObjects: [String: String] = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp", "invitation": "invitation_transp"]
         
         // initialize 10X4 2-dimensional array with 0's
         var objectPlacementArray: [[Int]] = Array(repeating: Array(repeating: 0, count: 4), count: 10)
         objectPlacementArray[0][0] = 1  // Don't place any objects on first space
-        print(objectPlacementArray)
+//        print(objectPlacementArray)
         
         for (key, value) in valueObjects
         {
@@ -175,11 +183,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             objectPlacementArray[rndColumn - 1][rndRow - 1] = 1
             
             objectNode = ObjectNode(objectName: key, imageName: value, objectPosition: objPos)
+            if objectNode.name == "invitation"
+            {
+                objectNode.isHidden = true
+                invitationNode = objectNode
+            }
             addChild(objectNode)
             
-            print("\n Added object \(key) with image \(value) \n at \(objPos)")
-            print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
+//            print("\n Added object \(key) with image \(value) \n at \(objPos)")
+//            print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
         }
+        
  
         // fill in blanks with blank objects
         for x in 0 ..< objectPlacementArray.count
@@ -194,7 +208,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                     objectNode?.isHidden = true
                     addChild(objectNode)
                     
-                    print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
+//                    print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
                     
                 }
             }
@@ -207,7 +221,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         let rndColumn: Int = Int(arc4random_uniform(10)+1)    // Generates Number from 1 to 10 for columns.
         let rndRow: Int = Int(arc4random_uniform(4)+1)    // Generates Number from 1 to 4 for rows.
         
-        print("\n\nColumn is \(rndColumn) and Row is \(rndRow) \n\n")
+//        print("\n\nColumn is \(rndColumn) and Row is \(rndRow) \n\n")
         
 //        let rndX = -310 + (125 * (rndColumn - 1))
 //        let rndY = 370 + (-220 * (rndRow - 1))
@@ -217,15 +231,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         
         let rndPos: CGPoint = CGPoint(x: rndX, y: rndY)
         
-        print("\n\n rndColumn is \(rndColumn) and rndRow is \(rndRow) \n\n")
-        print("\n\n rndX is \(rndX) and rndY is \(rndY) \n\n")
+//        print("\n\n rndColumn is \(rndColumn) and rndRow is \(rndRow) \n\n")
+//        print("\n\n rndX is \(rndX) and rndY is \(rndY) \n\n")
         
         return (rndColumn, rndRow, rndPos)
     }
     
     func getPosition(column: Int, row: Int) -> (CGPoint)
     {
-        print("\n\nColumn is \(column) and Row is \(row) \n\n")
+//        print("\n\nColumn is \(column) and Row is \(row) \n\n")
         
         let spritePosX = -938 + (205 * (column))
         let spritePosY = 365 + (-218 * (row))
@@ -238,7 +252,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     func didBegin(_ contact: SKPhysicsContact)
     {
-        print("Contact detected")
+//        print("Contact detected")
         var rabbitBody: SKPhysicsBody
         var objectBody: SKPhysicsBody
         
@@ -256,22 +270,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         
         if touched == PhysicsCategory.Rabbit | PhysicsCategory.ValueObject
         {
+            /*
             print("\n The name of the value object is \(objectBody.node!.name)")
             print("The position of the value object is \(objectBody.node!.position)\n")
             print("The position of the rabbit is \(rabbitBody.node!.position)\n")
             print("\n The value object is \(objectBody.node!) \n")
-
+*/
             
             landedOnObject = true
             objectLandedOn = objectBody.node!
-            print("endedMoveSequence is  \(endedMoveSequence)")
+//            print("endedMoveSequence is  \(endedMoveSequence)")
 
             
-            print("Landed on an object")
+//            print("Landed on an object")
         }
         else
         {
-            print("Passed through an object")
+//            print("Passed through an object")
         }
     }
     
@@ -325,22 +340,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         rabbitBody.contactTestBitMask = PhysicsCategory.ValueObject
 
         
-        var spacesToMoveOnThisRow:Int?
+//        var spacesToMoveOnThisRow:Int?
+        
+        // NEED TO CHECK currentRow or rowDirection WHEN MOVING MORE THAN 1 ROW DOWN OR UP
+        
+        if (currentRow % 2 > 0) // on an odd numbered row
+        {
+            rowDirection = 1
+        }
+        else  // on an even numbered row
+        {
+            rowDirection = -1
+        }
         
         if moveEnded == true
         {
             spacesToMoveOnThisRow = numSpaces
             
-            if (currentRow % 2 > 0) // on an odd numbered row
-            {
-                rowDirection = 1
-            }
-            else  // on an even numbered row
-            {
-                rowDirection = -1
-            }
+//            if (currentRow % 2 > 0) // on an odd numbered row
+//            {
+//                rowDirection = 1
+//            }
+//            else  // on an even numbered row
+//            {
+//                rowDirection = -1
+//            }
             
-            movesToMake.append(CGFloat(rowDirection * CGFloat(spacesToMoveOnThisRow!) * spaceSize))
+            movesToMake.append(CGFloat(rowDirection * CGFloat(spacesToMoveOnThisRow) * spaceSize))
         }
         else // move continues past this row
         {
@@ -358,8 +384,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             }
         }
 
-        self.rabbitPos = self.rabbitPos + spacesToMoveOnThisRow!
-        self.currentSpaceInRow = self.currentSpaceInRow + spacesToMoveOnThisRow!
+        self.rabbitPos = self.rabbitPos + spacesToMoveOnThisRow
+        self.currentSpaceInRow = self.currentSpaceInRow + spacesToMoveOnThisRow
         
 
         if self.moveEnded == false  // not on last row of move
@@ -367,7 +393,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             
             if spacesToMoveOnThisRow != 0 // if we are not at the end of the row append movement on row
             {
-                movesToMake.append(CGFloat(rowDirection * CGFloat(spacesToMoveOnThisRow!) * spaceSize))
+                movesToMake.append(CGFloat(rowDirection * CGFloat(spacesToMoveOnThisRow) * spaceSize))
             }
             
             movesToMake.append(0.0) // 0 indicates a move down or up
@@ -387,9 +413,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             else if numSpaces < 0 // if negative number move
             {
                 currentRow -= 1
-                spacesOnPrevRow = numSpaces + (abs(spacesToMoveOnThisRow!) + 1)
+                spacesOnPrevRow = numSpaces + (abs(spacesToMoveOnThisRow) + 1)
                 
-                currentSpaceInRow = 6
+ //               currentSpaceInRow = 6
+                currentSpaceInRow = 10
                 
                 if spacesOnPrevRow < 0
                 {
@@ -405,11 +432,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate
 
     func doMoveSequence()
     {
+        print("\n At start of doMoveSequence, operationStack contains \(operationStack)\n")
         // move x positions are now in movesToMake array. Create SKActions from them and store in actionsArray
         var aMove: SKAction
         
         actionsArray.removeAll()
-        
         
         let walkRight = SKAction.animate(with: walkRightFrames, timePerFrame: 0.1)
         let walkLeft = SKAction.animate(with: walkLeftFrames, timePerFrame: 0.1)
@@ -420,7 +447,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         let repeatStepSound = SKAction.repeat(playStepSound, count: movesToMake.count)
         // after accumulating all the path sections for the move, run the path
  
-
+        print("\n movesToMake is \(movesToMake)")
         
         for move in movesToMake
         {
@@ -439,64 +466,84 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             aMove = SKAction.group([aMove, walkNumberTimes, repeatStepSound])
             
             
-            print("Moving \(move) spaces on row")
+            print("\n Moving \(move) spaces on row\n")
         }
         else // move down or up if move == 0.0
         {
- 
+            print("\n Moving up or down a row \n")
             aMove = SKAction.moveBy(x: 0, y: rowHeight, duration: 1.0)
-            print("\n Moving down by \(rowHeight) pixels \n")
-            
-            if spacesToMove < 0  // if moving backward, replace aMove with this move to - rowHeight
+            print("\n spacesToMoveOnThisRow is \(spacesToMoveOnThisRow) \n")
+            if spacesToMoveOnThisRow < 0  // if moving backward, replace aMove with this move to - rowHeight
             {
                 aMove = SKAction.moveBy(x: 0, y: -rowHeight, duration: 1.0)
-                print("%%%%%% \n Moving up by \(-rowHeight) pixels %%%%%% \n")
+                print("%%%%%% \n Moving back by \(-rowHeight) pixels %%%%%% \n")
             }
 
-            if currentRow > 4 &&  spacesToMove > 0 // on bottom row with positive move, go up to top
+            if currentRow > 4 &&  spacesToMoveOnThisRow > 0 // on bottom row with positive move, go up to top
             {
                 aMove = SKAction.moveBy(x: 0, y: -3 * rowHeight, duration: 1.0)
                 currentRow = 1  // check whether this works with large move that goes up to top and then down to other rows
-                print("Moving down by \(rowHeight) pixels")
+                print("/n Moving up by \(rowHeight) pixels\n")
             }
-            else if currentRow < 1 && spacesToMove < 0  // on top row with negative move, go down to bottom
+            else if currentRow < 1 && spacesToMoveOnThisRow <= 0  // on top row with negative move, go down to bottom
             {
                 aMove = SKAction.moveBy(x: 0, y: 3 * rowHeight, duration: 1.0)
-                currentRow = 4  // check whether this works with large move that goes up to top and then down to other rows
-                print("Moving up by \(rowHeight) pixels")
+                currentRow = 4  // check whether this works with large move that goes down to bottom and then up to other rows
+                print("\nMoving down to bottom by \(rowHeight) pixels\n")
             }
+            print("\n currentSpaceInRow is \(currentSpaceInRow)\n")
         }
         
         actionsArray.append(aMove)
 
-        print("\n Appended \(aMove) to actionsArray")
+//        print("\n Appended \(aMove) to actionsArray")
         }
-        
+
         print("actionsArray is \(actionsArray)")
         
         let moveSequence = SKAction.sequence(actionsArray)
         print("moveSequence is \(moveSequence)")
         
         print("\n @@@@@@@ movesToMake is \(movesToMake) @@@@@@@@\n")
+        print("\n Before running moveSequence, operationStack contains \(operationStack)\n")
+        
+        usedTimes = false
+        usedAllOperations = false
+        bonusLabel.text = ""
+        
+        for op in operationStack
+        {
+            if op == "x"
+            {
+                usedTimes = true
+            }
+        }
+        
+        if operationStack.count > 1
+        {
+            usedAllOperations = true
+        }
         
         rabbitNode.run(moveSequence, completion:{
-            print("\n ran sequence\n")
-            print("\n Object landed on last was \(self.objectLandedOn) \n")
+              print("\n In run moveSequence, operationStack contains \(operationStack)\n")
+  //          print("\n ran sequence\n")
+//            print("\n Object landed on last was \(self.objectLandedOn) \n")
             
             if self.objectLandedOn.name != "blank"
             && self.objectLandedOn.isHidden == false
             {
                 self.collectObject(object: self.objectLandedOn)
             }
+           
             // move has been run, get new numbers for a new equation
             self.getNewNumbers()
         })
-
     }
     
     
     func collectObject(object: SKNode)
     {
+        print("\n At the start of collectObject, operationStack contains \(operationStack)\n")
         if let emitter = SKEmitterNode(fileNamed: "HeartsParticles.sks")
         {
             emitter.particlePosition = object.position
@@ -504,18 +551,53 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             addChild(emitter)
             run(SKAction.playSoundFileNamed("clipFromTaira-komori_fairies02.wav", waitForCompletion: false))
             object.isHidden = true
+            numberOfObjectsCollected += 1
             
             let collectedObject = object.name
             
-            print("\n\n The object collected was \(String(describing: collectedObject))\n\n")
+//            print("\n\n The object collected was \(String(describing: collectedObject))\n\n")
             
-            let objectValue = objectValues[collectedObject!]
+            var objectValue = objectValues[collectedObject!]
             
-            print("\n\n The value of object \(String(describing: collectedObject)) is \(String(describing: objectValue)) \n\n")
             
-            score += objectValue!
+            // if times was used, display bonus message
+            print("\n In collectObject, usedTimes is \(usedTimes)\n")
+            var bonusStr = ""
+            var bonusValue = objectValue
+            
+                if usedTimes == true
+                {
+                    bonusStr = "Multiplication Bonus! Double Points!"
+                    bonusValue = objectValue! * 2
+                }
+            
+                if usedAllOperations == true
+                {
+                    bonusStr = "Used All the Numbers! Triple Points!"
+                    bonusValue = objectValue! * 3
+                }
+            
+                if usedAllOperations == true && usedTimes == true
+                {
+                    bonusStr = "Used x and All the Numbers! 6x Points!"
+                    bonusValue = objectValue! * 6
+                }
+            
+            self.bonusLabel.text = bonusStr
+            print("\n Object Value was \(String(describing: objectValues[collectedObject!])) and Bonus Value is \(String(describing: bonusValue)) \n")
+
+
+            
+//            print("\n\n The value of object \(String(describing: collectedObject)) is \(String(describing: objectValue)) \n\n")
+            
+            score += bonusValue!
             
             scoreLabel.text = "Score: \(score)"
+            
+            if numberOfObjectsCollected >= objectValues.count - 1  // objectValues contains an extra item to serve as a hidden 'blank' object, hence count - 1
+            {
+                invitationNode.isHidden = false
+            }
         }
     }
     
@@ -554,7 +636,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 if node.name == "plus"
                 {
-                    print("Touched the plus sign")
+ //                   print("Touched the plus sign")
                     node.isHidden = true
                     equationDisplay.text! = equationDisplay.text! +  " +"
                    
@@ -563,7 +645,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 }
                 else if node.name == "minus"
                 {
-                    print("Touched the minus sign")
+ //                   print("Touched the minus sign")
                     node.isHidden = true
                     equationDisplay.text! = equationDisplay.text! +  " -"
                     operatorCount += 1
@@ -573,7 +655,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 }
                 else if node.name == "times"
                 {
-                    print("Touched the times sign")
+//                    print("Touched the times sign")
                     node.isHidden = true
                     equationDisplay.text! = equationDisplay.text! +  " x"
                     run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
@@ -584,15 +666,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 }
                 else if node.name == "equals"
                 {
-                    print("Touched the equals sign")
-                    node.isHidden = true
-                    equationDisplay.text! = equationDisplay.text! +  " ="
+//                    print("Touched the equals sign")
                     
-                    equalsPressed()
+                    print("\n When = pressed, operationStack contains \(operationStack) and Operand Stack is \(operandStack)\n")
+//  Equals sign not a valid input unless there are at least one operation and at 2 operands on the stack
+                    if operationStack.count > 0 && operandStack.count > 1
+                    {
+                        node.isHidden = true
+                        equationDisplay.text! = equationDisplay.text! +  " ="
+                        
+                        equalsPressed()
+                    }
                 }
                 else if node.name == "move"
                 {
-                    print("Touched the move label")
+//                    print("Touched the move label")
                     digitEntered = false
                     moveRabbit(numSpaces: answer)
                     doMoveSequence()
@@ -605,22 +693,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 if node.name == "firstNumber" || node.name == "secondNumber" || node.name == "thirdNumber"
                 {
                         let thisNumber = node as! SKLabelNode
-                        spacesToMove = Int(thisNumber.text!)!
+                        digitSelected = Int(thisNumber.text!)!
                         thisNumber.isHidden = true
-                        digitPressed(numberPressed: spacesToMove)
+                        digitPressed(numberPressed: digitSelected)
                         numberExpected = false
                 }
             }
                     
             if node.name == "clear"
             {
-                print("Touched the clear label")
+//                print("Touched the clear label")
                 clear()
                 numberExpected = true
             }
             else if node.name == "delete"
             {
-                print("Touched the delete label")
+//                print("Touched the delete label")
                 delete()
             // If deleting the 2nd operator, both it and the third operator that was hidden must be restored. Save what the 3rd operator was, or check against operationStack
             }
@@ -650,7 +738,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     func digitPressed(numberPressed: Int)
     {
         run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
-        print("\n Digit pressed is \(numberPressed)\n")
+//        print("\n Digit pressed is \(numberPressed)\n")
         print("\n Equation is : \(String(describing: equationDisplay.text)) \n")
         equationDisplay.text! = equationDisplay.text! +  " " + String(numberPressed)
         
@@ -678,7 +766,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         var strAnswer = ""
         answer = 0
         
-        print("Equals pressed; Equation being evaluated.")
+//        print("Equals pressed; Equation being evaluated.")
+        
         run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
         
         answer = evaluateEquation()
@@ -763,6 +852,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         clearLabel.isHidden = true
         deleteLabel.isHidden = true
         moveLabel.isHidden = true
+        
+//        extraOperation = ""
     }
     
     func hideNumsAndOps()
@@ -779,6 +870,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         clearLabel.isHidden = false
         deleteLabel.isHidden = false
         moveLabel.isHidden = false
+        
+//        extraOperation = ""
     }
     
     func restoreNumOrOp(value:String)
@@ -892,6 +985,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         scoreLabel.position = CGPoint(x: -950, y: 502)
         scoreLabel.zPosition = 8
         addChild(scoreLabel)
+    }
+    
+    func setBonusLabel(bonus: String)
+    {
+        bonusLabel.text = "\(bonus)"
+        bonusLabel.fontSize = 65
+        //        scoreLabel.fontColor = UIColor(red: 0.0, green: 40.0, blue: 217.0, alpha: 1.0)
+//        scoreLabel.fontColor = SKColor(red: 0.1, green: 0.5, blue: 0.0, alpha: 0.0)
+        bonusLabel.fontColor = .red
+        bonusLabel.horizontalAlignmentMode = .center
+        bonusLabel.position = CGPoint(x: 70, y: 502)
+        bonusLabel.zPosition = 8
+        addChild(bonusLabel)
     }
     
     func setEquationDisplay()
