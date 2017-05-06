@@ -35,7 +35,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var rabbitNode: RabbitNode!
     var objectNode: ObjectNode!
     var invitationNode: ObjectNode!
-    var level = "Pepper"
     
     var fgNode: SKNode!
     var hearts: SKSpriteNode!
@@ -151,7 +150,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         equalsSprite.name = "equals"
     }
     
-
+/*
+    override func update(_ currentTime: TimeInterval)
+    {
+        if endedMoveSequence == true
+        {
+            rabbitNode.run(SKAction.moveBy(x: 0, y: 0, duration: 1.0))
+            {
+                self.endedMoveSequence = false
+            }
+        }
+    }
+*/
     func placeValueObjects()
     {
         let valueObjects: [String: String] = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp", "invitation": "invitation_transp"]
@@ -546,11 +556,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             let collectedObject = object.name
             
             print("\n\n The object collected was \(String(describing: collectedObject))\n\n")
-            
-            if collectedObject == "invitation"
-            {
-                levelUp()
-            }
             
             var objectValue = objectValues[collectedObject!]
             
@@ -1007,13 +1012,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         addChild(equationDisplay)
     }
     
-    func levelUp()
-    {
-        if level == "Pepper"
-        {
-            let nextLevel = TeaScene(
-        }
-    }
 
 } // end of class GameScene
 
