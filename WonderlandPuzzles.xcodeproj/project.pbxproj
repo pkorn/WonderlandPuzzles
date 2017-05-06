@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		441128381EBD631700916F81 /* TeaScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 441128371EBD631700916F81 /* TeaScene.swift */; };
 		44D248B61E5E0EA00034FE49 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D248B51E5E0EA00034FE49 /* AppDelegate.swift */; };
 		44D248B81E5E0EA00034FE49 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 44D248B71E5E0EA00034FE49 /* GameScene.sks */; };
 		44D248BA1E5E0EA00034FE49 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 44D248B91E5E0EA00034FE49 /* Actions.sks */; };
@@ -55,6 +56,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		441128371EBD631700916F81 /* TeaScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeaScene.swift; sourceTree = "<group>"; };
 		44D248B21E5E0EA00034FE49 /* WonderlandPuzzles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WonderlandPuzzles.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44D248B51E5E0EA00034FE49 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44D248B71E5E0EA00034FE49 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 				44D248CD1E5E0F4F0034FE49 /* Sounds */,
 				44D248B51E5E0EA00034FE49 /* AppDelegate.swift */,
 				44D248BB1E5E0EA00034FE49 /* GameScene.swift */,
+				441128371EBD631700916F81 /* TeaScene.swift */,
 				44D248F41E60544C0034FE49 /* RabbitNode.swift */,
 				44D249111E607CB50034FE49 /* ObjectNode.swift */,
 				44D249251E63DFC10034FE49 /* Calculator.swift */,
@@ -329,6 +332,7 @@
 				44D248F51E60544C0034FE49 /* RabbitNode.swift in Sources */,
 				44D248BE1E5E0EA00034FE49 /* GameViewController.swift in Sources */,
 				44D249061E605A430034FE49 /* Int+Extensions.swift in Sources */,
+				441128381EBD631700916F81 /* TeaScene.swift in Sources */,
 				44D249041E605A430034FE49 /* CGPoint+Extensions.swift in Sources */,
 				44D249081E605A430034FE49 /* SKAction+SpecialEffects.swift in Sources */,
 				44D2490E1E605A430034FE49 /* Vector3.swift in Sources */,
