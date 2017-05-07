@@ -112,6 +112,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         path = childNode(withName: "path") as! SKTileMapNode
     }
     
+    override init(size: CGSize) {
+        super.init(size: size)
+        anchorPoint = CGPoint(x: 0.5, y: 0.5)
+    }
     
     override func didMove(to view: SKView)
     {
@@ -535,6 +539,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 self.collectObject(object: self.objectLandedOn)
             }
            
+            if self.invitationNode.isHidden == false
+            {
+                print("\n Landed on the invitation, go to next level!\n")
+                self.newScene()
+            }
+            
             // move has been run, get new numbers for a new equation
             self.getNewNumbers()
         })
@@ -598,6 +608,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             if numberOfObjectsCollected >= objectValues.count - 2 // the 'blank' club and the invitation must be subtracted from the count
             {
                 invitationNode.isHidden = false
+ //               newScene()
             }
         }
     }
@@ -1011,7 +1022,60 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         equationDisplay.zPosition = 8
         addChild(equationDisplay)
     }
+/*
+    func newGame() {
+//(width: 2048, height: 1536)
+        init(size: CGSize)
+        {
+            super.init(size: size)
+        }
+        view!.presentScene(GameScene.level(levelNum: currentLevel))
+    }
+    
+ if let scene = GameScene.level(levelNum: 1) {
+ // Set the scale mode to scale to fit the window
+ scene.scaleMode = .aspectFill
+ 
+ // Present the scene
+ view.presentScene(scene)
+ }
+ */
     
 
+    
+    var currentLevel: Int = 1
+    
+    func newScene()
+    {
+//        if let scene = GameScene.level(levelNum: 2)
+        if let nextScene: SKScene = SKScene(fileNamed: "Level2")
+        {
+            // Set the scale mode to scale to fit the window
+            nextScene.scaleMode = .aspectFill
+            
+//            let transition = SKTransition.moveIn(with: .right, duration: 1)
+            let transition = SKTransition.doorway(withDuration: 2.0)
+            
+            // Present the scene
+            scene?.view?.presentScene(nextScene as SKScene, transition: transition)
+        }
+
+    }
+
+ /*
+    func newScene()
+    {
+        let scene = GameScene.level(levelNum: 2)
+        view!.presentScene(GameScene.level(levelNum: currentLevel))
+    }
+ 
+    class func level(levelNum: Int) -> GameScene? {
+        let scene = GameScene(fileNamed: "Level\(levelNum)")!
+        scene.currentLevel = levelNum
+        scene.scaleMode = .aspectFill
+        return scene
+    }
+*/
+    
 } // end of class GameScene
 

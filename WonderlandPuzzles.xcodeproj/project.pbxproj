@@ -8,8 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		441128381EBD631700916F81 /* TeaScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 441128371EBD631700916F81 /* TeaScene.swift */; };
+		4411283A1EBD7DA700916F81 /* Level2.sks in Resources */ = {isa = PBXBuildFile; fileRef = 441128391EBD7DA700916F81 /* Level2.sks */; };
 		44D248B61E5E0EA00034FE49 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D248B51E5E0EA00034FE49 /* AppDelegate.swift */; };
-		44D248B81E5E0EA00034FE49 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 44D248B71E5E0EA00034FE49 /* GameScene.sks */; };
+		44D248B81E5E0EA00034FE49 /* Level1.sks in Resources */ = {isa = PBXBuildFile; fileRef = 44D248B71E5E0EA00034FE49 /* Level1.sks */; };
 		44D248BA1E5E0EA00034FE49 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 44D248B91E5E0EA00034FE49 /* Actions.sks */; };
 		44D248BC1E5E0EA00034FE49 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D248BB1E5E0EA00034FE49 /* GameScene.swift */; };
 		44D248BE1E5E0EA00034FE49 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D248BD1E5E0EA00034FE49 /* GameViewController.swift */; };
@@ -57,9 +58,10 @@
 
 /* Begin PBXFileReference section */
 		441128371EBD631700916F81 /* TeaScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeaScene.swift; sourceTree = "<group>"; };
+		441128391EBD7DA700916F81 /* Level2.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Level2.sks; sourceTree = "<group>"; };
 		44D248B21E5E0EA00034FE49 /* WonderlandPuzzles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WonderlandPuzzles.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44D248B51E5E0EA00034FE49 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		44D248B71E5E0EA00034FE49 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
+		44D248B71E5E0EA00034FE49 /* Level1.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Level1.sks; sourceTree = "<group>"; };
 		44D248B91E5E0EA00034FE49 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		44D248BB1E5E0EA00034FE49 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		44D248BD1E5E0EA00034FE49 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -185,7 +187,8 @@
 		44D248E31E5E4D680034FE49 /* Scenes */ = {
 			isa = PBXGroup;
 			children = (
-				44D248B71E5E0EA00034FE49 /* GameScene.sks */,
+				44D248B71E5E0EA00034FE49 /* Level1.sks */,
+				441128391EBD7DA700916F81 /* Level2.sks */,
 				44D249221E627D4F0034FE49 /* Particles */,
 				44D248DE1E5E36640034FE49 /* Path.sks */,
 				44D248E41E5E4DA10034FE49 /* Rabbit.sks */,
@@ -286,7 +289,7 @@
 				44D248EF1E5E649C0034FE49 /* running2.mp3 in Resources */,
 				44D248C11E5E0EA00034FE49 /* Main.storyboard in Resources */,
 				44D249181E607DB50034FE49 /* win.mp3 in Resources */,
-				44D248B81E5E0EA00034FE49 /* GameScene.sks in Resources */,
+				44D248B81E5E0EA00034FE49 /* Level1.sks in Resources */,
 				44D248D31E5E0FCD0034FE49 /* magic-wand-1.wav in Resources */,
 				44D248DB1E5E11AC0034FE49 /* baby-sneezing-1.wav in Resources */,
 				44D248C31E5E0EA00034FE49 /* Assets.xcassets in Resources */,
@@ -301,6 +304,7 @@
 				44D249241E627DE90034FE49 /* HeartsParticles.sks in Resources */,
 				44D248D91E5E104F0034FE49 /* soundPepperShaker.wav in Resources */,
 				44D249101E6069010034FE49 /* magntron__gamemusic.mp3 in Resources */,
+				4411283A1EBD7DA700916F81 /* Level2.sks in Resources */,
 				44D248E91E5E5F3A0034FE49 /* running-sounds.mp3 in Resources */,
 				44D249171E607DB50034FE49 /* pop.mp3 in Resources */,
 				44D248D71E5E104F0034FE49 /* soundClick.wav in Resources */,
