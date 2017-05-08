@@ -36,6 +36,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var objectNode: ObjectNode!
     var invitationNode: ObjectNode!
     
+    let inviteImg = SKSpriteNode(imageNamed: "teaInvitation")
+    
     var fgNode: SKNode!
     var hearts: SKSpriteNode!
     var objectLandedOn: SKNode!
@@ -152,6 +154,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         timesSprite.name = "times"
         equalsSprite = childNode(withName: "equals") as! SKSpriteNode
         equalsSprite.name = "equals"
+        inviteImg.isHidden = true
     }
     
 /*
@@ -539,10 +542,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                 self.collectObject(object: self.objectLandedOn)
             }
            
-            if self.invitationNode.isHidden == false
+            if self.invitationNode.isHidden == false && self.objectLandedOn.name == "invitation"
             {
                 print("\n Landed on the invitation, go to next level!\n")
-                self.newScene()
+                
+                self.showInvitation(forLevel: 2)
+                
+//                self.newScene()
             }
             
             // move has been run, get new numbers for a new equation
@@ -644,106 +650,117 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             let location = touch.location(in: self)
             let node: SKNode = self.atPoint(location)
             
-            if !numberExpected
+            if inviteImg.isHidden == false  // if the big invitation is on screen, go to the next scene when it is touched
             {
-                if node.name == "plus"
+                if node.name == "inviteImg"
                 {
- //                   print("Touched the plus sign")
-                    node.isHidden = true
-                    equationDisplay.text! = equationDisplay.text! +  " +"
-                   
-                    operationPressed(operation: "+")
-                    numberExpected = true
+                    inviteImg.isHidden = true
+                    newScene()
                 }
-                else if node.name == "minus"
+            }
+            else
+            {
+                if !numberExpected
                 {
- //                   print("Touched the minus sign")
-                    node.isHidden = true
-                    equationDisplay.text! = equationDisplay.text! +  " -"
-                    operatorCount += 1
-                    
-                    operationPressed(operation: "-")
-                    numberExpected = true
-                }
-                else if node.name == "times"
-                {
-//                    print("Touched the times sign")
-                    node.isHidden = true
-                    equationDisplay.text! = equationDisplay.text! +  " x"
-                    run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
-                    operatorCount += 1
-                    
-                    operationPressed(operation: "x")
-                    numberExpected = true
-                }
-                else if node.name == "equals"
-                {
-//                    print("Touched the equals sign")
-                    
-                    print("\n When = pressed, operationStack contains \(operationStack) and Operand Stack is \(operandStack)\n")
-//  Equals sign not a valid input unless there are at least one operation and at 2 operands on the stack
-                    if operationStack.count > 0 && operandStack.count > 1
+                    if node.name == "plus"
                     {
+        //                   print("Touched the plus sign")
                         node.isHidden = true
-                        equationDisplay.text! = equationDisplay.text! +  " ="
+                        equationDisplay.text! = equationDisplay.text! +  " +"
+                       
+                        operationPressed(operation: "+")
+                        numberExpected = true
+                    }
+                    else if node.name == "minus"
+                    {
+        //                   print("Touched the minus sign")
+                        node.isHidden = true
+                        equationDisplay.text! = equationDisplay.text! +  " -"
+                        operatorCount += 1
                         
-                        equalsPressed()
+                        operationPressed(operation: "-")
+                        numberExpected = true
+                    }
+                    else if node.name == "times"
+                    {
+        //                    print("Touched the times sign")
+                        node.isHidden = true
+                        equationDisplay.text! = equationDisplay.text! +  " x"
+                        run(SKAction.playSoundFileNamed("soundClick.wav", waitForCompletion: false))
+                        operatorCount += 1
+                        
+                        operationPressed(operation: "x")
+                        numberExpected = true
+                    }
+                    else if node.name == "equals"
+                    {
+        //                    print("Touched the equals sign")
+                        
+                        print("\n When = pressed, operationStack contains \(operationStack) and Operand Stack is \(operandStack)\n")
+        //  Equals sign not a valid input unless there are at least one operation and at 2 operands on the stack
+                        if operationStack.count > 0 && operandStack.count > 1
+                        {
+                            node.isHidden = true
+                            equationDisplay.text! = equationDisplay.text! +  " ="
+                            
+                            equalsPressed()
+                        }
+                    }
+                    else if node.name == "move"
+                    {
+        //                    print("Touched the move label")
+                        digitEntered = false
+                        moveRabbit(numSpaces: answer)
+                        doMoveSequence()
+                        clear()
+                        numberExpected = true
                     }
                 }
-                else if node.name == "move"
+                else  // if numberExpected
                 {
-//                    print("Touched the move label")
-                    digitEntered = false
-                    moveRabbit(numSpaces: answer)
-                    doMoveSequence()
+                    if node.name == "firstNumber" || node.name == "secondNumber" || node.name == "thirdNumber"
+                    {
+                            let thisNumber = node as! SKLabelNode
+                            digitSelected = Int(thisNumber.text!)!
+                            thisNumber.isHidden = true
+                            digitPressed(numberPressed: digitSelected)
+                            numberExpected = false
+                    }
+                }
+                        
+                if node.name == "clear"
+                {
+        //                print("Touched the clear label")
                     clear()
                     numberExpected = true
                 }
-            }
-            else  // if numberExpected
-            {
-                if node.name == "firstNumber" || node.name == "secondNumber" || node.name == "thirdNumber"
+                else if node.name == "delete"
                 {
-                        let thisNumber = node as! SKLabelNode
-                        digitSelected = Int(thisNumber.text!)!
-                        thisNumber.isHidden = true
-                        digitPressed(numberPressed: digitSelected)
-                        numberExpected = false
+        //                print("Touched the delete label")
+                    delete()
+                // If deleting the 2nd operator, both it and the third operator that was hidden must be restored. Save what the 3rd operator was, or check against operationStack
                 }
-            }
-                    
-            if node.name == "clear"
-            {
-//                print("Touched the clear label")
-                clear()
-                numberExpected = true
-            }
-            else if node.name == "delete"
-            {
-//                print("Touched the delete label")
-                delete()
-            // If deleting the 2nd operator, both it and the third operator that was hidden must be restored. Save what the 3rd operator was, or check against operationStack
-            }
 
-            if node.name != "delete" && extraOperation == ""
-            {
-                if plusSprite.isHidden && minusSprite.isHidden
+                if node.name != "delete" && extraOperation == ""
                 {
-                    timesSprite.isHidden = true
-                    extraOperation = "x"
+                    if plusSprite.isHidden && minusSprite.isHidden
+                    {
+                        timesSprite.isHidden = true
+                        extraOperation = "x"
+                    }
+                    else if plusSprite.isHidden && timesSprite.isHidden
+                    {
+                        minusSprite.isHidden = true
+                        extraOperation = "-"
+                    }
+                    else if minusSprite.isHidden && timesSprite.isHidden
+                    {
+                        plusSprite.isHidden = true
+                        extraOperation = "+"
+                    }
                 }
-                else if plusSprite.isHidden && timesSprite.isHidden
-                {
-                    minusSprite.isHidden = true
-                    extraOperation = "-"
-                }
-                else if minusSprite.isHidden && timesSprite.isHidden
-                {
-                    plusSprite.isHidden = true
-                    extraOperation = "+"
-                }
-            }
 
+            }
         }
     }
     
@@ -1043,12 +1060,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
 
     
-    var currentLevel: Int = 1
+//    var currentLevel: Int = 1
+    var levelNum = 1
     
     func newScene()
     {
+        levelNum += 1
+        
 //        if let scene = GameScene.level(levelNum: 2)
-        if let nextScene: SKScene = SKScene(fileNamed: "Level2")
+//        if let nextScene: SKScene = SKScene(fileNamed: "Level2")
+        if let nextScene: SKScene = SKScene(fileNamed: "Level\(levelNum)")
         {
             // Set the scale mode to scale to fit the window
             nextScene.scaleMode = .aspectFill
@@ -1060,6 +1081,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             scene?.view?.presentScene(nextScene as SKScene, transition: transition)
         }
 
+    }
+    
+    
+    func showInvitation(forLevel: Int)
+    {
+        inviteImg.position = CGPoint.zero
+        inviteImg.zPosition = 200
+        inviteImg.setScale(2)
+        inviteImg.name = "inviteImg"
+        inviteImg.isHidden = false
+        
+        addChild(inviteImg)
     }
 
  /*

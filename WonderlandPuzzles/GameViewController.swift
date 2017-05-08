@@ -16,13 +16,17 @@ class GameViewController: UIViewController {
     
 //        super.viewDidLoad()
     
-    override func viewDidAppear(_ animated: Bool)
-    {        
+//    override func viewDidAppear(_ animated: Bool)
+    override func viewWillLayoutSubviews()
+    {
+        super.viewWillLayoutSubviews()
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
              if let scene = SKScene(fileNamed: "Level1") {
 //            if let scene = GameScene.level(levelNum: 1) {
                 // Set the scale mode to scale to fit the window
+                
+                
                 scene.scaleMode = .aspectFill                
                 
                 // Present the scene
