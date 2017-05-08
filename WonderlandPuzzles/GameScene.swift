@@ -18,25 +18,27 @@ struct PhysicsCategory
     static let None:           UInt32 = 0           // 0
     static var Rabbit:         UInt32 = 0b1         // 1
     static let ValueObject:    UInt32 = 0b10        // 2
-    static var Bubbles1:       UInt32 = 0b100       // 4
-    static var Pig1:           UInt32 = 0b1000      // 8
-    static var Ladle1:         UInt32 = 0b10000     // 16
-    static var Bottle1:        UInt32 = 0b100000    // 32
-    static var Shaker1:        UInt32 = 0b1000000   // 64
-    static var Cauldron1:      UInt32 = 0b1000000   // 128
-    static var Blank:          UInt32 = 0b10000000  // 256
-    static var Invitation:     UInt32 = 0b100000000 // 512
-//
 }
+
+struct gameLevel {
+    static var levelNum = 1
+    static var score = 0
+}
+
+
 class GameScene: SKScene, SKPhysicsContactDelegate
 {
-//    var background = SKSpriteNode(imageNamed: "background_PepperSoup")
     var path: SKTileMapNode!
     var rabbitNode: RabbitNode!
     var objectNode: ObjectNode!
     var invitationNode: ObjectNode!
     
-    let inviteImg = SKSpriteNode(imageNamed: "teaInvitation")
+    var valueObjects = [String: String]()
+    var objectValues = [String: Int]()
+    
+    var levelNum = gameLevel.levelNum
+//    let inviteImg = SKSpriteNode(imageNamed: "teaInvitation")
+    var inviteImg = SKSpriteNode()
     
     var fgNode: SKNode!
     var hearts: SKSpriteNode!
@@ -62,7 +64,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     var spacesToMoveOnThisRow: Int = 0
     var plus: SKSpriteNode!
     
-    var score: Int = 0
+    var score: Int = gameLevel.score
     var lives: Int = 3
 
     
@@ -104,9 +106,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
                               SKTexture(imageNamed: "whiteRabbit_transp3_left"),
                               SKTexture(imageNamed: "whiteRabbit_transp_left")]
     
-    var objectValues: [String: Int] = ["black_club": 0, "bubbles": 25, "shaker": 25, "pig": 50, "bottle": 75, "ladle": 75, "cauldron": 75, "invitation": 0]
-    
-    
     
     required init?(coder aDecoder: NSCoder)
     {
@@ -121,12 +120,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     override func didMove(to view: SKView)
     {
+
+        print("\n In didMove, levelNum is \(levelNum)")
         placeValueObjects()
         
         rabbitNode = childNode(withName: "//whiteRabbit") as! RabbitNode
         
         rabbitNode?.position = CGPoint(x: 0, y: -100)
-//        print("\n Before move, Rabbit is at \(rabbitNode.position.x) \n")
       
 //        SKTAudio.sharedInstance().playBackgroundMusic("magntron__gamemusic.mp3")
         
@@ -169,9 +169,47 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         }
     }
 */
+    
+    func setValueObjects(levelNum: Int)
+    {
+        switch levelNum
+        {
+        case 1:  valueObjects = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp", "invitation": "invitation_transp"]
+            
+        case 2:  valueObjects = ["fork": "fork50_transp", "spoon": "spoon50_transp", "knife": "knife_transp", "cup": "cup_transp", "saucer": "saucer_transp", "bread": "bread-butter_transp", "dormouse": "dormice_transp", "teapot": "teapot_transp", "invitation": "invitation_transp"]
+            
+       case 3:  valueObjects = ["club": "black_club", "spade": "black_spade", "heart": "red_heart", "diamond": "red_diamond", "rose": "red_rose", "paintcan": "red_paint", "paintbrush": "red_paint_brush", "invitation": "invitation_transp"]
+            
+       case 4:  valueObjects = ["club": "black_club", "spade": "black_spade", "heart": "red_heart", "diamond": "red_diamond", "rose": "red_rose", "paintcan": "red_paint", "paintbrush": "red_paint_brush", "invitation": "invitation_transp"]
+            
+        default: print("Not a valid level")
+        }
+    }
+    
+    func setObjectValues(levelNum: Int)
+    {
+        switch levelNum
+        {
+        case 1:  objectValues = ["black_club": 0, "bubbles": 25, "shaker": 25, "pig": 50, "bottle": 75, "ladle": 75, "cauldron": 75, "invitation": 0]
+            
+        case 2:  objectValues = ["black_club": 0, "fork": 50, "spoon": 50, "knife": 50, "cup": 50, "saucer": 50, "bread": 75, "dormouse": 100, "teapot": 75, "invitation": 0]
+            
+        case 3:  objectValues = ["black_club": 0, "club": 75, "spade": 75, "heart": 75, "diamond": 75, "rose": 100, "paintcan": 150, "paintbrush": 150, "invitation": 0]
+            
+        case 4:  objectValues = ["black_club": 0, "bubbles": 25, "shaker": 25, "pig": 50, "bottle": 75, "ladle": 75, "cauldron": 75, "invitation": 0]
+            
+        default: print("Not a valid level")
+        }
+    }
+
+    
     func placeValueObjects()
     {
-        let valueObjects: [String: String] = ["bubbles": "bubbles_transp", "shaker": "pepper_transp", "pig": "pig_transp", "bottle": "baby_bottle_transp", "ladle": "ladle_transp", "cauldron": "cauldron_transp", "invitation": "invitation_transp"]
+        print("\n Level number is \(levelNum)\n")
+        setValueObjects(levelNum: levelNum)
+        setObjectValues(levelNum: levelNum)
+        
+        print("\n From placeValueObjects, valueObjects contains \(valueObjects)\n")
         
         // initialize 10X4 2-dimensional array with 0's
         var objectPlacementArray: [[Int]] = Array(repeating: Array(repeating: 0, count: 4), count: 10)
@@ -197,8 +235,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             }
             addChild(objectNode)
             
-//            print("\n Added object \(key) with image \(value) \n at \(objPos)")
-//            print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
+            print("\n Added object \(key) with image \(value) \n at \(objPos)")
+            print("\n\n The objectNode is \(objectNode?.objectName). Its position is \(objectNode?.objectPosition) \n\n")
         }
         
  
@@ -546,7 +584,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
             {
                 print("\n Landed on the invitation, go to next level!\n")
                 
-                self.showInvitation(forLevel: 2)
+                self.showInvitation(forLevel: self.levelNum + 1)
                 
 //                self.newScene()
             }
@@ -1058,17 +1096,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate
  }
  */
     
-
-    
-//    var currentLevel: Int = 1
-    var levelNum = 1
-    
     func newScene()
     {
         levelNum += 1
+        gameLevel.levelNum = levelNum
+        gameLevel.score = score
         
-//        if let scene = GameScene.level(levelNum: 2)
-//        if let nextScene: SKScene = SKScene(fileNamed: "Level2")
+//        placeValueObjects()
+        print("\n From newScene, valueObjects contains \(valueObjects)\n")
+        
         if let nextScene: SKScene = SKScene(fileNamed: "Level\(levelNum)")
         {
             // Set the scale mode to scale to fit the window
@@ -1086,6 +1122,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     func showInvitation(forLevel: Int)
     {
+        switch forLevel
+        {
+        case 2:  inviteImg = SKSpriteNode(imageNamed: "teaInvitation")
+            
+        case 3:  inviteImg = SKSpriteNode(imageNamed: "cardInvitation")
+            
+        case 4:  inviteImg = SKSpriteNode(imageNamed: "croquetInvitation")
+            
+        default: print("Not a valid level for an invitation.")
+        }
+        
         inviteImg.position = CGPoint.zero
         inviteImg.zPosition = 200
         inviteImg.setScale(2)
