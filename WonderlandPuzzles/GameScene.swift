@@ -402,15 +402,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         {
             spacesToMoveOnThisRow = numSpaces
             
-//            if (currentRow % 2 > 0) // on an odd numbered row
-//            {
-//                rowDirection = 1
-//            }
-//            else  // on an even numbered row
-//            {
-//                rowDirection = -1
-//            }
-            
             movesToMake.append(CGFloat(rowDirection * CGFloat(spacesToMoveOnThisRow) * spaceSize))
         }
         else // move continues past this row
